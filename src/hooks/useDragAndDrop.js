@@ -67,9 +67,16 @@ export const useDragAndDrop = (components, setComponents) => {
     setDraggedNode(null);
     setDraggedPath(null);
     setIsDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
     setMousePosition({ x: e.clientX, y: e.clientY });
-    setDraggedElementPosition({ x: e.clientX, y: e.clientY });
+    setDraggedElementPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     e.dataTransfer.effectAllowed = 'move';
+    // Hide the native drag preview so our custom element is used
+    if (e.dataTransfer.setDragImage) {
+      const img = new Image();
+      img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=';
+      e.dataTransfer.setDragImage(img, 0, 0);
+    }
   };
 
   const handleExistingDragStart = (e, node, path) => {
@@ -78,9 +85,15 @@ export const useDragAndDrop = (components, setComponents) => {
     setDraggedPath(path);
     setDraggedType(null);
     setIsDragging(true);
+    const rect = e.currentTarget.getBoundingClientRect();
     setMousePosition({ x: e.clientX, y: e.clientY });
-    setDraggedElementPosition({ x: e.clientX, y: e.clientY });
+    setDraggedElementPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     e.dataTransfer.effectAllowed = 'move';
+    if (e.dataTransfer.setDragImage) {
+      const img = new Image();
+      img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=';
+      e.dataTransfer.setDragImage(img, 0, 0);
+    }
   };
 
   // Helper to find the candidate container and drop index

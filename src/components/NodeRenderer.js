@@ -27,8 +27,8 @@ const NodeRenderer = ({
   const renderDraggedElement = () => {
     if (!isDragging || !draggedNode) return null;
     const style = {
-      left: mousePosition.x,
-      top: mousePosition.y,
+      left: mousePosition.x - draggedElementPosition.x,
+      top: mousePosition.y - draggedElementPosition.y,
     };
     return (
       <div className="dragging" style={style}>
