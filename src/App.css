@@ -1,0 +1,420 @@
+/* Base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* Blocks UI Container Layout */
+.blocks-ui-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Main content area */
+.blocks-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Canvas area */
+.canvas-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-right: 1px solid #e1e4e8;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #24292e;
+}
+
+.canvas {
+  flex: 1;
+  min-height: 400px;
+  border: 2px dashed #e1e4e8;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #fafbfc;
+  overflow-y: auto;
+}
+
+.empty-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #6a737d;
+  font-size: 14px;
+}
+
+/* Canvas row and nested container styles */
+.canvas-row,
+.canvas-col {
+  position: relative;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  background-color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: move;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.canvas-row:active,
+.canvas-col:active {
+  opacity: 0.7;
+}
+
+.canvas-row.drag-over,
+.canvas-col.drag-over {
+  border-color: #0366d6;
+  background-color: rgba(3, 102, 214, 0.05);
+  box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.2);
+  transform: translateY(4px);
+}
+
+/* Delete buttons */
+.delete-btn,
+.delete-row-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #d73a49;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.canvas-row.hovered > .delete-row-btn,
+.canvas-col.hovered > .delete-btn,
+.component-wrapper.hovered > .delete-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Right panel */
+.right-panel {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+}
+
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.tab-btn {
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+  border-bottom: 2px solid #0366d6;
+  color: #0366d6;
+  font-weight: 600;
+}
+
+/* Components panel */
+.components-panel {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.component-item {
+  padding: 12px;
+  margin-bottom: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  cursor: move;
+  transition: all 0.2s ease;
+}
+
+.component-item:hover {
+  border-color: #0366d6;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.component-preview {
+  margin-bottom: 8px;
+  padding: 8px;
+  background-color: #fafbfc;
+  border-radius: 4px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.preview-placeholder {
+  width: 100%;
+  height: 10px;
+  background-color: #e1e4e8;
+  border-radius: 2px;
+}
+
+.component-label {
+  font-size: 13px;
+  color: #24292e;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Builder container styles */
+
+.builder-col {
+  /* float: left; Remove float as it conflicts with flexbox */
+  /* gap: 8px; This gap is applied by the parent row */
+  /* padding: 20px; */ /* Removed padding from the flex item */
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid #e1e4e8; /* Add back border for visibility during debugging */
+  background-color: #fff; /* Add back background for visibility */
+  position: relative;
+  flex-grow: 0; /* Prevent columns from growing */
+  flex-shrink: 0; /* Prevent columns from shrinking */
+  /* Remove flex-basis from here */
+}
+
+/* Grid system for columns (24-column grid) */
+.canvas-col[data-span] {
+  --span: attr(data-span);
+  width: calc((var(--span) * 100% / 24) - 8px);
+  flex-basis: calc((var(--span) * 100% / 24) - 8px);
+}
+
+/* Set the span values */
+.canvas-col[data-span="1"] { --span: 1; }
+.canvas-col[data-span="2"] { --span: 2; }
+.canvas-col[data-span="3"] { --span: 3; }
+.canvas-col[data-span="4"] { --span: 4; }
+.canvas-col[data-span="5"] { --span: 5; }
+.canvas-col[data-span="6"] { --span: 6; }
+.canvas-col[data-span="7"] { --span: 7; }
+.canvas-col[data-span="8"] { --span: 8; }
+.canvas-col[data-span="9"] { --span: 9; }
+.canvas-col[data-span="10"] { --span: 10; }
+.canvas-col[data-span="11"] { --span: 11; }
+.canvas-col[data-span="12"] { --span: 12; }
+.canvas-col[data-span="13"] { --span: 13; }
+.canvas-col[data-span="14"] { --span: 14; }
+.canvas-col[data-span="15"] { --span: 15; }
+.canvas-col[data-span="16"] { --span: 16; }
+.canvas-col[data-span="17"] { --span: 17; }
+.canvas-col[data-span="18"] { --span: 18; }
+.canvas-col[data-span="19"] { --span: 19; }
+.canvas-col[data-span="20"] { --span: 20; }
+.canvas-col[data-span="21"] { --span: 21; }
+.canvas-col[data-span="22"] { --span: 22; }
+.canvas-col[data-span="23"] { --span: 23; }
+.canvas-col[data-span="24"] { --span: 24; }
+
+.builder-col {
+  padding: 10px; /* Add padding to an inner div */
+  border: 1px dashed #ccc; /* Add a border to the inner div for visibility */
+  min-height: 40px;
+  box-sizing: border-box;
+}
+
+.builder-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  min-height: 40px;
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: none;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.component-wrapper {
+  position: relative;
+  width: auto;
+  flex: 0 0 auto;
+  cursor: move;
+  margin-right: 8px; /* horizontal gap */
+  margin-bottom: 8px; /* vertical gap for stacked items */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Add specific styling for button and datepicker components */
+.component-wrapper[data-type="button"],
+.component-wrapper[data-type="datepicker"] {
+  display: inline-block;
+}
+
+.component-wrapper:active {
+  opacity: 0.7;
+}
+
+.table-preview {
+  width: 100%;
+  height: 40px;
+  background-color: #f6f8fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #6a737d;
+}
+
+.component-wrapper.drag-over {
+  border: 2px dashed #0366d6;
+  background-color: #f6f8fa;
+}
+
+/* Properties Panel */
+.properties-panel {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.properties-panel h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #24292e;
+}
+
+.property-group {
+  margin-bottom: 16px;
+}
+
+.property-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #586069;
+  margin-bottom: 4px;
+}
+
+
+/* Selected component styles */
+.canvas-row.selected,
+.canvas-col.selected,
+.component-wrapper.selected {
+  outline: 2px solid #0366d6;
+  outline-offset: 2px;
+}
+
+.component-wrapper .ant-table-wrapper,
+.component-wrapper .ant-table,
+.component-wrapper .ant-table-content,
+.component-wrapper .ant-table-body {
+  width: 100%; /* Make the table elements take full width */
+  flex-grow: 1; /* Allow table to grow if parent is flex */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Remove margin for the last item in a row/col if needed */
+.builder-row > .component-wrapper:last-child,
+.builder-col > .component-wrapper:last-child {
+  margin-right: 0;
+  margin-bottom: 0;
+}
+
+/* Make ComboBox always take full width of its wrapper */
+.component-wrapper[data-type="combobox"] {
+  width: 100%;
+}
+
+/* Drag and Drop styles */
+.dragging {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  transform: translate(-50%, -50%);
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 2px solid #0366d6;
+  border-radius: 4px;
+  padding: 8px;
+  opacity: 0.9;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drag-ghost {
+  opacity: 0.3;
+  background: #f6f8fa;
+  border: 2px dashed #0366d6;
+  border-radius: 4px;
+  position: absolute;
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* Add smooth transitions for all draggable elements */
+.canvas-row,
+.canvas-col,
+.component-wrapper {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Add a preview style for the drop target */
+.drag-over {
+  border: 2px dashed #0366d6;
+  background-color: rgba(3, 102, 214, 0.05);
+  box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.2);
+}
+
+/* Drop preview styles */
+.drop-preview {
+  position: absolute;
+  pointer-events: none;
+  z-index: 999;
+  background: rgba(3, 102, 214, 0.1);
+  border: 2px dashed #0366d6;
+  border-radius: 4px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

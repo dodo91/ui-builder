@@ -1,0 +1,54 @@
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+.toolbar {
+  width: 200px;
+  padding: 10px;
+  border-right: 1px solid #ccc;
+}
+
+.canvas {
+  flex: 1;
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+.row {
+  min-height: 50px;
+  border: 2px dashed #ccc;
+  margin: 10px;
+  padding: 10px;
+}
+
+.row-hover {
+  border-color: #2196f3;
+}
+
+.component {
+  position: relative;
+  margin: 5px;
+  cursor: move;
+}
+
+.selected {
+  outline: 2px solid #2196f3;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.code-preview {
+  width: 400px;
+  padding: 10px;
+  border-left: 1px solid #ccc;
+  overflow: auto;
+}
