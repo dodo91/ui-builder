@@ -30,6 +30,7 @@ const NodeRenderer = ({
 }) => {
   const renderDraggedElement = () => {
     if (!isDragging || !draggedNode) return null;
+    if (['row', 'col', 'form'].includes(draggedNode.type)) return null;
     const style = {
       left: mousePosition.x - draggedElementPosition.x,
       top: mousePosition.y - draggedElementPosition.y,
@@ -40,9 +41,6 @@ const NodeRenderer = ({
         {draggedNode.type === 'combobox' && <ComboBoxComponent options={draggedNode.props.options} />}
         {draggedNode.type === 'datepicker' && <DatePickerComponent />}
         {draggedNode.type === 'table' && <TableComponent />}
-        {draggedNode.type === 'row' && <div className="preview-placeholder">Row</div>}
-        {draggedNode.type === 'col' && <div className="preview-placeholder">Col</div>}
-        {draggedNode.type === 'form' && <div className="preview-placeholder">Form</div>}
         {draggedNode.type === 'formItem' && <div className="preview-placeholder">Form.Item</div>}
       </div>
     );
