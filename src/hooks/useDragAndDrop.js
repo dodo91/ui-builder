@@ -1,6 +1,38 @@
 import { useState, useEffect } from 'react';
 import { createNode, addNodeAtPath, removeNodeAtPath, getNodeAtPath } from '../utils/treeUtils';
 
+// Determine if dropping a node of type `dragType` inside a container of
+// type `containerType` is allowed. This centralises the rules for
+// parent/child relationships in the builder.
+export const isValidDrop = (dragType, containerType) => {
+  if (!containerType) return false;
+
+  // leaf components cannot contain others
+  if (['button', 'datepicker', 'combobox'].includes(containerType)) {
+    return false;
+  }
+
+  if (dragType === 'formItem') {
+    return containerType === 'form';
+  }
+
+  if (dragType === 'form') {
+    return containerType === 'row' || containerType === 'col';
+  }
+
+  // rows and cols can nest in each other
+  if (dragType === 'row' && (containerType === 'row' || containerType === 'col')) {
+    return true;
+  }
+
+  if (dragType === 'col' && (containerType === 'row' || containerType === 'col')) {
+    return true;
+  }
+
+  // Allow other combinations by default (e.g. buttons inside cols/rows/formItem etc.)
+  return true;
+};
+
 export const useDragAndDrop = (components, setComponents) => {
   const [draggedType, setDraggedType] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
@@ -14,6 +46,7 @@ export const useDragAndDrop = (components, setComponents) => {
   const [currentContainer, setCurrentContainer] = useState(null);
   const [candidateContainerId, setCandidateContainerId] = useState(null);
   const [candidateDropIndex, setCandidateDropIndex] = useState(null);
+  const [invalidDropTarget, setInvalidDropTarget] = useState(null);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -132,6 +165,30 @@ export const useDragAndDrop = (components, setComponents) => {
     setCandidateContainerId(containerId);
     setCandidateDropIndex(dropIndex);
 
+    // Determine if this container is a valid drop target
+    if (containerId) {
+      const findNodeById = (nodes, nodeId) => {
+        for (const n of nodes) {
+          if (n.id === nodeId) return n;
+          if (n.children) {
+            const found = findNodeById(n.children, nodeId);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const containerNode = containerId === 'root' ? { type: 'root' } : findNodeById(components, containerId);
+      const dragType = draggedType || (draggedNode && draggedNode.type);
+      if (containerNode && dragType && !isValidDrop(dragType, containerNode.type)) {
+        setInvalidDropTarget(containerId);
+      } else {
+        setInvalidDropTarget(null);
+      }
+    } else {
+      setInvalidDropTarget(null);
+    }
+
     // Calculate virtual positions for all affected elements
     if (containerId) {
       const container = document.getElementById(containerId) || document.querySelector(`[data-id='${containerId}']`);
@@ -210,16 +267,17 @@ export const useDragAndDrop = (components, setComponents) => {
     setVirtualPositions({});
     setCandidateContainerId(null);
     setCandidateDropIndex(null);
+    setInvalidDropTarget(null);
   };
 
   const handleDrop = (e, path) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const containerNode = path.length === 0 ? { type: 'root' } : getNodeAtPath(components, path);
+    const containerNode = path.length === 0 ? { type: 'root', id: 'root' } : getNodeAtPath(components, path);
+    const dragType = draggedType || (draggedNode && draggedNode.type);
 
-    if ((draggedType === 'formItem' || (draggedNode && draggedNode.type === 'formItem')) && containerNode?.type !== 'form') {
-      // Form.Item can only be dropped inside a Form
+    if (containerNode && dragType && !isValidDrop(dragType, containerNode.type)) {
       setDragOverMap({});
       setDraggedType(null);
       setDraggedNode(null);
@@ -230,6 +288,7 @@ export const useDragAndDrop = (components, setComponents) => {
       setCurrentContainer(null);
       setCandidateContainerId(null);
       setCandidateDropIndex(null);
+      setInvalidDropTarget(null);
       return;
     }
     
@@ -301,6 +360,7 @@ export const useDragAndDrop = (components, setComponents) => {
     setCurrentContainer(null);
     setCandidateContainerId(null);
     setCandidateDropIndex(null);
+    setInvalidDropTarget(null);
   };
 
   const handleDelete = (path) => {
@@ -320,6 +380,7 @@ export const useDragAndDrop = (components, setComponents) => {
     currentContainer,
     candidateContainerId,
     candidateDropIndex,
+    invalidDropTarget,
     handleDragStart,
     handleExistingDragStart,
     handleDragOver,

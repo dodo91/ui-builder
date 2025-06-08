@@ -28,7 +28,8 @@ function App() {
     virtualPositions,
     currentContainer,
     candidateContainerId,
-    candidateDropIndex
+    candidateDropIndex,
+    invalidDropTarget
   } = useDragAndDrop(components, setComponents);
 
   const {
@@ -61,13 +62,13 @@ function App() {
       <div className="blocks-main">
         <div className="canvas-container">
           <h3 className="section-title">Canvas</h3>
-          <div 
-            className="canvas" 
+          <div
+            className={`canvas${invalidDropTarget === 'root' ? ' invalid-drop' : ''}`}
             onDragOver={(e) => {
               e.preventDefault();
               e.stopPropagation();
               handleDragOver(e, 'root');
-            }} 
+            }}
             onDrop={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -96,6 +97,7 @@ function App() {
               currentContainer={currentContainer}
               candidateContainerId={candidateContainerId}
               candidateDropIndex={candidateDropIndex}
+              invalidDropTarget={invalidDropTarget}
             />
           </div>
         </div>

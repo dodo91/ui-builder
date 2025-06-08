@@ -25,7 +25,8 @@ const NodeRenderer = ({
   virtualPositions,
   currentContainer,
   candidateContainerId,
-  candidateDropIndex
+  candidateDropIndex,
+  invalidDropTarget
 }) => {
   const renderDraggedElement = () => {
     if (!isDragging || !draggedNode) return null;
@@ -106,6 +107,7 @@ const NodeRenderer = ({
               node={node}
               path={currentPath}
               selectedComponent={selectedComponent}
+              invalidDropTarget={invalidDropTarget}
             >
               <NodeRenderer 
                 nodes={node.children} 
@@ -127,6 +129,7 @@ const NodeRenderer = ({
                 currentContainer={currentContainer}
                 candidateContainerId={candidateContainerId}
                 candidateDropIndex={candidateDropIndex}
+                invalidDropTarget={invalidDropTarget}
               />
             </RowContainer>
           );
@@ -155,6 +158,7 @@ const NodeRenderer = ({
               node={node}
               path={currentPath}
               selectedComponent={selectedComponent}
+              invalidDropTarget={invalidDropTarget}
             >
               <NodeRenderer 
                 nodes={node.children} 
@@ -176,6 +180,7 @@ const NodeRenderer = ({
                 currentContainer={currentContainer}
                 candidateContainerId={candidateContainerId}
                 candidateDropIndex={candidateDropIndex}
+                invalidDropTarget={invalidDropTarget}
               />
             </ColContainer>
           );
@@ -203,6 +208,7 @@ const NodeRenderer = ({
               node={node}
               path={currentPath}
               selectedComponent={selectedComponent}
+              invalidDropTarget={invalidDropTarget}
             >
               <NodeRenderer
                 nodes={node.children}
@@ -224,6 +230,7 @@ const NodeRenderer = ({
                 currentContainer={currentContainer}
                 candidateContainerId={candidateContainerId}
                 candidateDropIndex={candidateDropIndex}
+                invalidDropTarget={invalidDropTarget}
               />
             </FormContainer>
           );
@@ -275,6 +282,7 @@ const NodeRenderer = ({
                   currentContainer={currentContainer}
                   candidateContainerId={candidateContainerId}
                   candidateDropIndex={candidateDropIndex}
+                  invalidDropTarget={invalidDropTarget}
                 />
               ) : (
                 <Input disabled placeholder="Input" />
@@ -289,7 +297,7 @@ const NodeRenderer = ({
           <div 
             key={key} 
             id={key}
-            className={`component-wrapper${isActive ? ' hovered' : ''} ${dragOverMap[key] ? ' drag-over' : ''} ${isSelected ? ' selected' : ''}`}
+            className={`component-wrapper${isActive ? ' hovered' : ''} ${dragOverMap[key] ? ' drag-over' : ''} ${isSelected ? ' selected' : ''} ${invalidDropTarget === key ? ' invalid-drop' : ''}`}
             data-type={node.type}
             style={{
               ...shiftStyle,
