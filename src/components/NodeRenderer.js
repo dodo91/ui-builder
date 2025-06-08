@@ -25,10 +25,11 @@ const NodeRenderer = ({
   virtualPositions,
   currentContainer,
   candidateContainerId,
-  candidateDropIndex
+  candidateDropIndex,
+  invalidDropId
 }) => {
   const renderDraggedElement = () => {
-    if (!isDragging || !draggedNode) return null;
+    if (!isDragging || !draggedNode || (mousePosition.x === 0 && mousePosition.y === 0)) return null;
     const style = {
       left: mousePosition.x - draggedElementPosition.x,
       top: mousePosition.y - draggedElementPosition.y,
@@ -127,6 +128,7 @@ const NodeRenderer = ({
                 currentContainer={currentContainer}
                 candidateContainerId={candidateContainerId}
                 candidateDropIndex={candidateDropIndex}
+                invalidDropId={invalidDropId}
               />
             </RowContainer>
           );
@@ -176,6 +178,7 @@ const NodeRenderer = ({
                 currentContainer={currentContainer}
                 candidateContainerId={candidateContainerId}
                 candidateDropIndex={candidateDropIndex}
+                invalidDropId={invalidDropId}
               />
             </ColContainer>
           );
@@ -224,6 +227,7 @@ const NodeRenderer = ({
                 currentContainer={currentContainer}
                 candidateContainerId={candidateContainerId}
                 candidateDropIndex={candidateDropIndex}
+                invalidDropId={invalidDropId}
               />
             </FormContainer>
           );
@@ -275,6 +279,7 @@ const NodeRenderer = ({
                   currentContainer={currentContainer}
                   candidateContainerId={candidateContainerId}
                   candidateDropIndex={candidateDropIndex}
+                  invalidDropId={invalidDropId}
                 />
               ) : (
                 <Input disabled placeholder="Input" />
@@ -289,7 +294,7 @@ const NodeRenderer = ({
           <div 
             key={key} 
             id={key}
-            className={`component-wrapper${isActive ? ' hovered' : ''} ${dragOverMap[key] ? ' drag-over' : ''} ${isSelected ? ' selected' : ''}`}
+            className={`component-wrapper${isActive ? ' hovered' : ''} ${dragOverMap[key] ? ' drag-over' : ''} ${isSelected ? ' selected' : ''} ${invalidDropId === key ? ' invalid-drop' : ''}`}
             data-type={node.type}
             style={{
               ...shiftStyle,

@@ -68,3 +68,28 @@ export const getNodeAtPath = (nodes, path) => {
   }
   return current;
 };
+
+export const findPathById = (nodes, id, currentPath = []) => {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (node.id === id) return [...currentPath, i];
+    if (node.children && node.children.length > 0) {
+      const res = findPathById(node.children, id, [...currentPath, i]);
+      if (res) return res;
+    }
+  }
+  return null;
+};
+
+export const insertNodeAtPath = (nodes, path, newNode) => {
+  if (path.length === 1) {
+    const index = path[0];
+    return [...nodes.slice(0, index), newNode, ...nodes.slice(index)];
+  }
+  const [idx, ...rest] = path;
+  return nodes.map((n, i) =>
+    i === idx
+      ? { ...n, children: insertNodeAtPath(n.children || [], rest, newNode) }
+      : n
+  );
+};

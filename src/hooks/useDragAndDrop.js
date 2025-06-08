@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createNode, addNodeAtPath, removeNodeAtPath, getNodeAtPath } from '../utils/treeUtils';
+import { createNode, addNodeAtPath, removeNodeAtPath, getNodeAtPath, findPathById, insertNodeAtPath } from '../utils/treeUtils';
 
 export const useDragAndDrop = (components, setComponents) => {
   const [draggedType, setDraggedType] = useState(null);
@@ -14,6 +14,7 @@ export const useDragAndDrop = (components, setComponents) => {
   const [currentContainer, setCurrentContainer] = useState(null);
   const [candidateContainerId, setCandidateContainerId] = useState(null);
   const [candidateDropIndex, setCandidateDropIndex] = useState(null);
+  const [invalidDropId, setInvalidDropId] = useState(null);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -100,12 +101,23 @@ export const useDragAndDrop = (components, setComponents) => {
   const findCandidateContainerAndIndex = (e) => {
     let container = e.currentTarget;
     let containerId = container.id || container.getAttribute('data-id');
-    if (!containerId) {
-      // fallback: try parent
+
+    // ascend until we find an element that can accept children
+    const canContain = (id) => {
+      if (id === 'root') return true;
+      const p = findPathById(components, id);
+      const node = p ? getNodeAtPath(components, p) : null;
+      return node && ['row', 'col', 'form', 'formItem'].includes(node.type);
+    };
+
+    while (container && !canContain(containerId)) {
       container = container.parentElement;
       containerId = container?.id || container?.getAttribute('data-id');
     }
-    if (!containerId) return { containerId: null, dropIndex: null };
+
+    if (!containerId || !canContain(containerId)) {
+      return { containerId: null, dropIndex: null };
+    }
 
     // Find all children (siblings)
     const siblings = Array.from(container.querySelectorAll(':scope > .component-wrapper, :scope > .canvas-row, :scope > .canvas-col'));
@@ -126,6 +138,11 @@ export const useDragAndDrop = (components, setComponents) => {
     setDragOverMap(prev => ({ ...prev, [id]: true }));
     setDragOverIndex(index);
     setMousePosition({ x: e.clientX, y: e.clientY });
+
+    const targetPath = findPathById(components, id);
+    const targetNode = targetPath ? getNodeAtPath(components, targetPath) : null;
+    const isContainer = !targetNode || ['row', 'col', 'form', 'formItem'].includes(targetNode.type);
+    setInvalidDropId(isContainer ? null : id);
 
     // Find candidate container and drop index
     const { containerId, dropIndex } = findCandidateContainerAndIndex(e);
@@ -210,16 +227,39 @@ export const useDragAndDrop = (components, setComponents) => {
     setVirtualPositions({});
     setCandidateContainerId(null);
     setCandidateDropIndex(null);
+    setInvalidDropId(null);
   };
 
-  const handleDrop = (e, path) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const containerNode = path.length === 0 ? { type: 'root' } : getNodeAtPath(components, path);
+    if (invalidDropId) {
+      // drop on invalid target, simply reset
+      setDragOverMap({});
+      setDraggedType(null);
+      setDraggedNode(null);
+      setDraggedPath(null);
+      setIsDragging(false);
+      setDragOverIndex(null);
+      setVirtualPositions({});
+      setCurrentContainer(null);
+      setCandidateContainerId(null);
+      setCandidateDropIndex(null);
+      setInvalidDropId(null);
+      return;
+    }
+
+    let containerPath;
+    if (!candidateContainerId || candidateContainerId === 'root') {
+      containerPath = [];
+    } else {
+      containerPath = findPathById(components, candidateContainerId) || [];
+    }
+
+    const containerNode = containerPath.length === 0 ? { type: 'root' } : getNodeAtPath(components, containerPath);
 
     if ((draggedType === 'formItem' || (draggedNode && draggedNode.type === 'formItem')) && containerNode?.type !== 'form') {
-      // Form.Item can only be dropped inside a Form
       setDragOverMap({});
       setDraggedType(null);
       setDraggedNode(null);
@@ -232,65 +272,25 @@ export const useDragAndDrop = (components, setComponents) => {
       setCandidateDropIndex(null);
       return;
     }
-    
-    console.log('Drop:', { 
-      draggedType, 
-      draggedNode, 
-      draggedPath, 
-      dropPath: path 
-    });
-    
+
+    const dropIndex = candidateDropIndex ?? 0;
+
     if (draggedType) {
-      // Handle new component drop
       const newNode = createNode(draggedType);
-      setComponents(prev => addNodeAtPath(prev, path, newNode));
+      setComponents(prev => insertNodeAtPath(prev, [...containerPath, dropIndex], newNode));
     } else if (draggedNode) {
-      // Handle existing component move
       setComponents(prev => {
-        console.log('Previous components:', prev);
-        
-        // Check if we're trying to drop into the same path
-        if (JSON.stringify(draggedPath) === JSON.stringify(path)) {
-          console.log('Same path, ignoring drop');
-          return prev;
-        }
-
-        // Check if we're trying to drop into a child of the dragged node
-        const isDroppingIntoChild = path.length > draggedPath.length && 
-          draggedPath.every((item, index) => item === path[index]) &&
-          path[draggedPath.length] !== undefined;
-        
-        if (isDroppingIntoChild) {
-          console.log('Dropping into child, ignoring drop');
-          return prev;
-        }
-
-        // Create a deep copy of the dragged node
-        const nodeToMove = JSON.parse(JSON.stringify(draggedNode));
-        
-        // First remove the node from its original position
-        const withoutNode = removeNodeAtPath(prev, draggedPath);
-        console.log('After removal:', withoutNode);
-        
-        // Adjust the target path if we're moving within the same parent
-        let adjustedPath = [...path];
-        if (draggedPath.length === path.length && 
-            draggedPath.slice(0, -1).every((item, index) => item === path[index])) {
-          // If we're moving within the same parent, adjust the target index
+        let updated = removeNodeAtPath(prev, draggedPath);
+        let targetIndex = dropIndex;
+        if (draggedPath.slice(0, -1).every((p, i) => p === containerPath[i])) {
           const sourceIndex = draggedPath[draggedPath.length - 1];
-          const targetIndex = path[path.length - 1];
-          if (targetIndex > sourceIndex) {
-            adjustedPath[adjustedPath.length - 1] = targetIndex - 1;
-          }
+          if (sourceIndex < dropIndex) targetIndex = dropIndex - 1;
         }
-        
-        // Then add it to the new position
-        const result = addNodeAtPath(withoutNode, adjustedPath, nodeToMove);
-        console.log('After adding:', result);
-        return result;
+        const nodeToMove = JSON.parse(JSON.stringify(draggedNode));
+        return insertNodeAtPath(updated, [...containerPath, targetIndex], nodeToMove);
       });
     }
-    
+
     setDragOverMap({});
     setDraggedType(null);
     setDraggedNode(null);
@@ -301,6 +301,7 @@ export const useDragAndDrop = (components, setComponents) => {
     setCurrentContainer(null);
     setCandidateContainerId(null);
     setCandidateDropIndex(null);
+    setInvalidDropId(null);
   };
 
   const handleDelete = (path) => {
@@ -320,6 +321,7 @@ export const useDragAndDrop = (components, setComponents) => {
     currentContainer,
     candidateContainerId,
     candidateDropIndex,
+    invalidDropId,
     handleDragStart,
     handleExistingDragStart,
     handleDragOver,

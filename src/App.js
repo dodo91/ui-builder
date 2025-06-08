@@ -28,7 +28,8 @@ function App() {
     virtualPositions,
     currentContainer,
     candidateContainerId,
-    candidateDropIndex
+    candidateDropIndex,
+    invalidDropId
   } = useDragAndDrop(components, setComponents);
 
   const {
@@ -96,6 +97,7 @@ function App() {
               currentContainer={currentContainer}
               candidateContainerId={candidateContainerId}
               candidateDropIndex={candidateDropIndex}
+              invalidDropId={invalidDropId}
             />
           </div>
         </div>
