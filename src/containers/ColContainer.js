@@ -20,7 +20,8 @@ const ColContainer = ({
   node,
   path,
   selectedComponent,
-  style
+  style,
+  invalidDropTarget
 }) => {
   const isActive = hoverStack.includes(id) && deepestHoveredId === id;
   const isSelected = selectedComponent && selectedComponent.id === id;
@@ -30,7 +31,7 @@ const ColContainer = ({
       id={id}
       span={span}
       data-span={span}
-      className={`canvas-col builder-col${isActive ? ' hovered' : ''} ${isOver ? ' drag-over' : ''} ${isSelected ? ' selected' : ''}`}
+      className={`canvas-col builder-col${isActive ? ' hovered' : ''} ${isOver ? ' drag-over' : ''} ${isSelected ? ' selected' : ''} ${invalidDropTarget === id ? ' invalid-drop' : ''}`}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}

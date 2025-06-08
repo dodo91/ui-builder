@@ -19,7 +19,8 @@ const FormContainer = ({
   node,
   path,
   selectedComponent,
-  style
+  style,
+  invalidDropTarget
 }) => {
   const isActive = hoverStack.includes(id) && deepestHoveredId === id;
   const isSelected = selectedComponent && selectedComponent.id === id;
@@ -27,7 +28,7 @@ const FormContainer = ({
   return (
     <Form
       id={id}
-      className={`canvas-form builder-form${isActive ? ' hovered' : ''} ${isOver ? ' drag-over' : ''} ${isSelected ? ' selected' : ''}`}
+      className={`canvas-form builder-form${isActive ? ' hovered' : ''} ${isOver ? ' drag-over' : ''} ${isSelected ? ' selected' : ''} ${invalidDropTarget === id ? ' invalid-drop' : ''}`}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}

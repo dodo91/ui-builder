@@ -19,7 +19,8 @@ const RowContainer = ({
   node,
   path,
   selectedComponent,
-  style
+  style,
+  invalidDropTarget
 }) => {
   const isActive = hoverStack.includes(id) && deepestHoveredId === id;
   const isSelected = selectedComponent && selectedComponent.id === id;
@@ -27,7 +28,7 @@ const RowContainer = ({
   return (
     <Row
       id={id}
-      className={`canvas-row builder-row${isActive ? ' hovered' : ''} ${isOver ? ' drag-over' : ''} ${isSelected ? ' selected' : ''}`}
+      className={`canvas-row builder-row${isActive ? ' hovered' : ''} ${isOver ? ' drag-over' : ''} ${isSelected ? ' selected' : ''} ${invalidDropTarget === id ? ' invalid-drop' : ''}`}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
