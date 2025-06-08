@@ -5,6 +5,10 @@ export const generateCode = (components) => {
       return `${spaces}<Row>\n${node.children.map(child => renderNode(child, indent + 2)).join('\n')}\n${spaces}</Row>`;
     } else if (node.type === 'col') {
       return `${spaces}<Col>\n${node.children.map(child => renderNode(child, indent + 2)).join('\n')}\n${spaces}</Col>`;
+    } else if (node.type === 'form') {
+      return `${spaces}<Form>\n${node.children.map(child => renderNode(child, indent + 2)).join('\n')}\n${spaces}</Form>`;
+    } else if (node.type === 'formItem') {
+      return `${spaces}<Form.Item label="${node.props.label}" name="${node.props.name}">\n${node.children.map(child => renderNode(child, indent + 2)).join('\n')}\n${spaces}</Form.Item>`;
     } else if (node.type === 'button') {
       return `${spaces}<button>${node.props.label}</button>`;
     } else if (node.type === 'combobox') {

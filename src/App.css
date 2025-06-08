@@ -418,3 +418,28 @@ body {
   border-radius: 4px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Form containers */
+.canvas-form {
+  position: relative;
+  padding: 8px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  background-color: #fff;
+  margin-bottom: 10px;
+}
+
+.canvas-form-item {
+  position: relative;
+  padding: 8px;
+  border: 1px dashed #e1e4e8;
+  border-radius: 4px;
+  background-color: #fff;
+  margin-bottom: 8px;
+}
+
+.canvas-form.hovered > .delete-row-btn,
+.canvas-form-item.hovered > .delete-btn {
+  opacity: 1;
+  pointer-events: auto;
+}

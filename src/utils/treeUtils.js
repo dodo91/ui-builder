@@ -3,6 +3,8 @@ export const createNode = (type) => {
   switch(type) {
     case 'row': return { id, type, children: [] };
     case 'col': return { id, type, children: [], span: 12 };
+    case 'form': return { id, type, children: [], props: {} };
+    case 'formItem': return { id, type, children: [], props: { label: 'Label', name: 'field' } };
     case 'button': return { id, type, props: { label: 'Button' }, children: [] };
     case 'combobox': return { id, type, props: { options: ['Option 1','Option 2','Option 3'] }, children: [] };
     case 'datepicker': return { id, type, props: {}, children: [] };
@@ -49,11 +51,20 @@ export const removeNodeAtPath = (nodes, path) => {
 export const updateNodeAtPath = (nodes, path, updatedNode) => {
   if (path.length === 0) return nodes;
   const [idx, ...rest] = path;
-  return nodes.map((node, i) => 
-    i === idx 
-      ? rest.length === 0 
-        ? updatedNode 
+  return nodes.map((node, i) =>
+    i === idx
+      ? rest.length === 0
+        ? updatedNode
         : { ...node, children: updateNodeAtPath(node.children, rest, updatedNode) }
       : node
   );
-}; 
+};
+
+export const getNodeAtPath = (nodes, path) => {
+  let current = { children: nodes };
+  for (let idx of path) {
+    if (!current.children || !current.children[idx]) return null;
+    current = current.children[idx];
+  }
+  return current;
+};

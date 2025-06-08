@@ -135,15 +135,37 @@ function App() {
                 <div className="component-label">Row</div>
               </div>
 
-              <div 
-                className="component-item" 
-                draggable 
+              <div
+                className="component-item"
+                draggable
                 onDragStart={(e) => handleDragStart(e, 'col')}
               >
                 <div className="component-preview">
                   <div className="preview-placeholder"></div>
                 </div>
                 <div className="component-label">Col</div>
+              </div>
+
+              <div
+                className="component-item"
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'form')}
+              >
+                <div className="component-preview">
+                  <div className="preview-placeholder"></div>
+                </div>
+                <div className="component-label">Form</div>
+              </div>
+
+              <div
+                className="component-item"
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'formItem')}
+              >
+                <div className="component-preview">
+                  <div className="preview-placeholder"></div>
+                </div>
+                <div className="component-label">Form Item</div>
               </div>
 
               <div 
