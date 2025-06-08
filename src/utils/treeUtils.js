@@ -21,13 +21,28 @@ export const addNodeAtPath = (nodes, path, newNode) => {
     return result;
   }
   const [idx, ...rest] = path;
-  const result = nodes.map((n, i) => 
-    i === idx 
+  const result = nodes.map((n, i) =>
+    i === idx
       ? { ...n, children: addNodeAtPath(n.children, rest, newNode) }
       : n
   );
   console.log('Added at nested level:', result);
   return result;
+};
+
+// Insert a node at a specific index among the children of the node at `path`
+export const insertNodeAtPath = (nodes, path, index, newNode) => {
+  if (path.length === 0) {
+    const result = [...nodes];
+    result.splice(index, 0, newNode);
+    return result;
+  }
+  const [idx, ...rest] = path;
+  return nodes.map((n, i) =>
+    i === idx
+      ? { ...n, children: insertNodeAtPath(n.children || [], rest, index, newNode) }
+      : n
+  );
 };
 
 export const removeNodeAtPath = (nodes, path) => {
