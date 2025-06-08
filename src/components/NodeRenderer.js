@@ -51,13 +51,6 @@ const NodeRenderer = ({
     return <div className="drop-preview" style={virtualPositions.preview} />;
   };
 
-  // Helper to get the container id for this level
-  const getContainerId = () => {
-    if (path.length === 0) return 'root';
-    // Use the last node id in the path as the container id
-    return nodes && nodes[0] && nodes[0].parentId ? nodes[0].parentId : path.join('-');
-  };
-
   return (
     <>
       {path.length === 0 && renderDraggedElement()}
@@ -71,14 +64,6 @@ const NodeRenderer = ({
         // Apply virtual positions if available
         if (virtualPositions[key]) {
           shiftStyle = { ...shiftStyle, ...virtualPositions[key] };
-        }
-
-        // Only animate siblings in the candidate container
-        const thisContainerId = getContainerId();
-        if (isDragging && candidateContainerId === thisContainerId && candidateDropIndex !== null) {
-          if (index >= candidateDropIndex) {
-            shiftStyle = { transform: 'translateY(40px)', transition: 'transform 0.2s ease-out' };
-          }
         }
 
         if (node.type === 'row') {
