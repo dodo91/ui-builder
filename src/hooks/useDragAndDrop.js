@@ -142,6 +142,7 @@ export const useDragAndDrop = (components, setComponents) => {
     setCandidateDropIndex(dropIndex);
 
     // Determine if this container is a valid drop target
+    let isContainerValid = true;
     if (containerId) {
       const findNodeById = (nodes, nodeId) => {
         for (const n of nodes) {
@@ -158,15 +159,17 @@ export const useDragAndDrop = (components, setComponents) => {
       const dragType = draggedType || (draggedNode && draggedNode.type);
       if (containerNode && dragType && !isValidDrop(dragType, containerNode.type)) {
         setInvalidDropTarget(containerId);
+        isContainerValid = false;
       } else {
         setInvalidDropTarget(null);
       }
     } else {
       setInvalidDropTarget(null);
+      isContainerValid = false;
     }
 
-    // Calculate virtual positions for all affected elements
-    if (containerId) {
+    // Calculate virtual positions for all affected elements only if drop is valid
+    if (containerId && isContainerValid) {
       const container = document.getElementById(containerId) || document.querySelector(`[data-id='${containerId}']`);
       if (container) {
         const positions = {};
@@ -234,6 +237,8 @@ export const useDragAndDrop = (components, setComponents) => {
 
         setVirtualPositions(positions);
       }
+    } else {
+      setVirtualPositions({});
     }
   };
 
