@@ -70,30 +70,6 @@ export const useDragAndDrop = (components, setComponents) => {
     };
   }, [isDragging]);
 
-  const calculateVirtualPositions = (containerId, draggedIndex, mouseY) => {
-    const container = document.getElementById(containerId);
-    if (!container) return {};
-
-    const siblings = Array.from(container.children);
-    const positions = {};
-    
-    siblings.forEach((sibling, index) => {
-      if (index === draggedIndex) return;
-      
-      const rect = sibling.getBoundingClientRect();
-      const centerY = rect.top + rect.height / 2;
-      
-      if (mouseY < centerY && index > draggedIndex) {
-        positions[sibling.id] = { transform: 'translateY(-40px)' };
-      } else if (mouseY > centerY && index < draggedIndex) {
-        positions[sibling.id] = { transform: 'translateY(40px)' };
-      } else {
-        positions[sibling.id] = { transform: 'translateY(0)' };
-      }
-    });
-    
-    return positions;
-  };
 
   const handleDragStart = (e, type) => {
     setDraggedType(type);
