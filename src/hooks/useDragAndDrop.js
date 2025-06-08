@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createNode, addNodeAtPath, removeNodeAtPath, getNodeAtPath } from '../utils/treeUtils';
+import { createNode, insertNodeAtPath, removeNodeAtPath, getNodeAtPath, findPathById } from '../utils/treeUtils';
 
 // Determine if dropping a node of type `dragType` inside a container of
 // type `containerType` is allowed. This centralises the rules for
@@ -274,7 +274,10 @@ export const useDragAndDrop = (components, setComponents) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const containerNode = path.length === 0 ? { type: 'root', id: 'root' } : getNodeAtPath(components, path);
+    const containerPath = candidateContainerId
+      ? (candidateContainerId === 'root' ? [] : findPathById(components, candidateContainerId) || [])
+      : path;
+    const containerNode = containerPath.length === 0 ? { type: 'root', id: 'root' } : getNodeAtPath(components, containerPath);
     const dragType = draggedType || (draggedNode && draggedNode.type);
 
     if (containerNode && dragType && !isValidDrop(dragType, containerNode.type)) {
@@ -291,62 +294,37 @@ export const useDragAndDrop = (components, setComponents) => {
       setInvalidDropTarget(null);
       return;
     }
-    
-    console.log('Drop:', { 
-      draggedType, 
-      draggedNode, 
-      draggedPath, 
-      dropPath: path 
-    });
-    
+
+    const finalPath = [...containerPath, candidateDropIndex !== null ? candidateDropIndex : 0];
+
     if (draggedType) {
-      // Handle new component drop
       const newNode = createNode(draggedType);
-      setComponents(prev => addNodeAtPath(prev, path, newNode));
+      setComponents(prev => insertNodeAtPath(prev, finalPath, newNode));
     } else if (draggedNode) {
-      // Handle existing component move
       setComponents(prev => {
-        console.log('Previous components:', prev);
-        
-        // Check if we're trying to drop into the same path
-        if (JSON.stringify(draggedPath) === JSON.stringify(path)) {
-          console.log('Same path, ignoring drop');
+        if (JSON.stringify(draggedPath) === JSON.stringify(finalPath)) {
           return prev;
         }
 
-        // Check if we're trying to drop into a child of the dragged node
-        const isDroppingIntoChild = path.length > draggedPath.length && 
-          draggedPath.every((item, index) => item === path[index]) &&
-          path[draggedPath.length] !== undefined;
-        
+        const isDroppingIntoChild = containerPath.length > draggedPath.length - 1 &&
+          draggedPath.every((item, index) => index < containerPath.length && item === containerPath[index]);
+
         if (isDroppingIntoChild) {
-          console.log('Dropping into child, ignoring drop');
           return prev;
         }
 
-        // Create a deep copy of the dragged node
         const nodeToMove = JSON.parse(JSON.stringify(draggedNode));
-        
-        // First remove the node from its original position
         const withoutNode = removeNodeAtPath(prev, draggedPath);
-        console.log('After removal:', withoutNode);
-        
-        // Adjust the target path if we're moving within the same parent
-        let adjustedPath = [...path];
-        if (draggedPath.length === path.length && 
-            draggedPath.slice(0, -1).every((item, index) => item === path[index])) {
-          // If we're moving within the same parent, adjust the target index
-          const sourceIndex = draggedPath[draggedPath.length - 1];
-          const targetIndex = path[path.length - 1];
-          if (targetIndex > sourceIndex) {
-            adjustedPath[adjustedPath.length - 1] = targetIndex - 1;
-          }
+
+        let targetIndex = candidateDropIndex !== null ? candidateDropIndex : 0;
+        if (draggedPath.slice(0, -1).every((item, index) => item === containerPath[index]) &&
+            draggedPath.length - 1 === containerPath.length &&
+            targetIndex > draggedPath[draggedPath.length - 1]) {
+          targetIndex -= 1;
         }
-        
-        // Then add it to the new position
-        const result = addNodeAtPath(withoutNode, adjustedPath, nodeToMove);
-        console.log('After adding:', result);
-        return result;
+
+        const insertPath = [...containerPath, targetIndex];
+        return insertNodeAtPath(withoutNode, insertPath, nodeToMove);
       });
     }
     
