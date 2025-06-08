@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createNode, addNodeAtPath, removeNodeAtPath } from '../utils/treeUtils';
+import { createNode, addNodeAtPath, removeNodeAtPath, getNodeAtPath } from '../utils/treeUtils';
 
 export const useDragAndDrop = (components, setComponents) => {
   const [draggedType, setDraggedType] = useState(null);
@@ -215,6 +215,23 @@ export const useDragAndDrop = (components, setComponents) => {
   const handleDrop = (e, path) => {
     e.preventDefault();
     e.stopPropagation();
+
+    const containerNode = path.length === 0 ? { type: 'root' } : getNodeAtPath(components, path);
+
+    if ((draggedType === 'formItem' || (draggedNode && draggedNode.type === 'formItem')) && containerNode?.type !== 'form') {
+      // Form.Item can only be dropped inside a Form
+      setDragOverMap({});
+      setDraggedType(null);
+      setDraggedNode(null);
+      setDraggedPath(null);
+      setIsDragging(false);
+      setDragOverIndex(null);
+      setVirtualPositions({});
+      setCurrentContainer(null);
+      setCandidateContainerId(null);
+      setCandidateDropIndex(null);
+      return;
+    }
     
     console.log('Drop:', { 
       draggedType, 

@@ -51,6 +51,25 @@ const PropertiesEditor = ({ selectedComponent, onUpdate }) => {
             />
           </div>
         );
+      case 'formItem':
+        return (
+          <>
+            <div className="property-group">
+              <label>Label</label>
+              <Input
+                value={selectedComponent.props.label}
+                onChange={(e) => handlePropertyChange('label', e.target.value)}
+              />
+            </div>
+            <div className="property-group">
+              <label>Name</label>
+              <Input
+                value={selectedComponent.props.name}
+                onChange={(e) => handlePropertyChange('name', e.target.value)}
+              />
+            </div>
+          </>
+        );
       default:
         return <div>No properties available for this component</div>;
     }

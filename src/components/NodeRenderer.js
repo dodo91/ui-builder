@@ -1,7 +1,10 @@
 import React from 'react';
 import RowContainer from '../containers/RowContainer';
 import ColContainer from '../containers/ColContainer';
+import FormContainer from '../containers/FormContainer';
+import FormItemContainer from '../containers/FormItemContainer';
 import { ButtonComponent, ComboBoxComponent, DatePickerComponent, TableComponent } from './BasicComponents';
+import { Input } from 'antd';
 
 const NodeRenderer = ({ 
   nodes, 
@@ -38,6 +41,8 @@ const NodeRenderer = ({
         {draggedNode.type === 'table' && <TableComponent />}
         {draggedNode.type === 'row' && <div className="preview-placeholder">Row</div>}
         {draggedNode.type === 'col' && <div className="preview-placeholder">Col</div>}
+        {draggedNode.type === 'form' && <div className="preview-placeholder">Form</div>}
+        {draggedNode.type === 'formItem' && <div className="preview-placeholder">Form.Item</div>}
       </div>
     );
   };
@@ -173,6 +178,108 @@ const NodeRenderer = ({
                 candidateDropIndex={candidateDropIndex}
               />
             </ColContainer>
+          );
+        } else if (node.type === 'form') {
+          return (
+            <FormContainer
+              key={key}
+              id={key}
+              style={shiftStyle}
+              onDragOver={(e) => handlers.handleDragOver(e, key, index)}
+              onDragLeave={() => handlers.handleDragLeave(key)}
+              onDrop={(e) => handlers.handleDrop(e, currentPath)}
+              isOver={isOver}
+              onDelete={() => handlers.handleDelete(currentPath)}
+              hoverStack={hoverStack}
+              handleMouseEnter={handleMouseEnter}
+              handleMouseLeave={handleMouseLeave}
+              deepestHoveredId={deepestHoveredId}
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation();
+                handlers.handleExistingDragStart(e, node, currentPath);
+              }}
+              onComponentClick={onComponentClick}
+              node={node}
+              path={currentPath}
+              selectedComponent={selectedComponent}
+            >
+              <NodeRenderer
+                nodes={node.children}
+                path={currentPath}
+                handlers={handlers}
+                dragOverMap={dragOverMap}
+                hoverStack={hoverStack}
+                handleMouseEnter={handleMouseEnter}
+                handleMouseLeave={handleMouseLeave}
+                deepestHoveredId={deepestHoveredId}
+                onComponentClick={onComponentClick}
+                selectedComponent={selectedComponent}
+                mousePosition={mousePosition}
+                draggedElementPosition={draggedElementPosition}
+                isDragging={isDragging}
+                draggedNode={draggedNode}
+                dragOverIndex={dragOverIndex}
+                virtualPositions={virtualPositions}
+                currentContainer={currentContainer}
+                candidateContainerId={candidateContainerId}
+                candidateDropIndex={candidateDropIndex}
+              />
+            </FormContainer>
+          );
+        } else if (node.type === 'formItem') {
+          return (
+            <FormItemContainer
+              key={key}
+              id={key}
+              label={node.props.label}
+              name={node.props.name}
+              style={shiftStyle}
+              onDragOver={(e) => handlers.handleDragOver(e, key, index)}
+              onDragLeave={() => handlers.handleDragLeave(key)}
+              onDrop={(e) => handlers.handleDrop(e, currentPath)}
+              isOver={isOver}
+              onDelete={() => handlers.handleDelete(currentPath)}
+              hoverStack={hoverStack}
+              handleMouseEnter={handleMouseEnter}
+              handleMouseLeave={handleMouseLeave}
+              deepestHoveredId={deepestHoveredId}
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation();
+                handlers.handleExistingDragStart(e, node, currentPath);
+              }}
+              onComponentClick={onComponentClick}
+              node={node}
+              path={currentPath}
+              selectedComponent={selectedComponent}
+            >
+              {node.children && node.children.length > 0 ? (
+                <NodeRenderer
+                  nodes={node.children}
+                  path={currentPath}
+                  handlers={handlers}
+                  dragOverMap={dragOverMap}
+                  hoverStack={hoverStack}
+                  handleMouseEnter={handleMouseEnter}
+                  handleMouseLeave={handleMouseLeave}
+                  deepestHoveredId={deepestHoveredId}
+                  onComponentClick={onComponentClick}
+                  selectedComponent={selectedComponent}
+                  mousePosition={mousePosition}
+                  draggedElementPosition={draggedElementPosition}
+                  isDragging={isDragging}
+                  draggedNode={draggedNode}
+                  dragOverIndex={dragOverIndex}
+                  virtualPositions={virtualPositions}
+                  currentContainer={currentContainer}
+                  candidateContainerId={candidateContainerId}
+                  candidateDropIndex={candidateDropIndex}
+                />
+              ) : (
+                <Input disabled placeholder="Input" />
+              )}
+            </FormItemContainer>
           );
         }
         // leaf components
