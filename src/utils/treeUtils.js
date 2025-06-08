@@ -14,37 +14,29 @@ export const createNode = (type) => {
 };
 
 export const addNodeAtPath = (nodes, path, newNode) => {
-  console.log('Adding at path:', { nodes, path, newNode });
   if (path.length === 0) {
-    const result = [...nodes, newNode];
-    console.log('Added at root level:', result);
-    return result;
+    return [...nodes, newNode];
   }
   const [idx, ...rest] = path;
-  const result = nodes.map((n, i) => 
-    i === idx 
+  const result = nodes.map((n, i) =>
+    i === idx
       ? { ...n, children: addNodeAtPath(n.children, rest, newNode) }
       : n
   );
-  console.log('Added at nested level:', result);
   return result;
 };
 
 export const removeNodeAtPath = (nodes, path) => {
-  console.log('Removing at path:', { nodes, path });
   if (path.length === 1) {
     const idx = path[0];
-    const result = [...nodes.slice(0, idx), ...nodes.slice(idx + 1)];
-    console.log('Removed at root level:', result);
-    return result;
+    return [...nodes.slice(0, idx), ...nodes.slice(idx + 1)];
   }
   const [idx, ...rest] = path;
-  const result = nodes.map((n, i) => 
-    i === idx 
+  const result = nodes.map((n, i) =>
+    i === idx
       ? { ...n, children: removeNodeAtPath(n.children, rest) }
       : n
   );
-  console.log('Removed at nested level:', result);
   return result;
 };
 

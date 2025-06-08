@@ -133,16 +133,28 @@ export const useDragAndDrop = (components, setComponents) => {
   const findCandidateContainerAndIndex = (e) => {
     let container = e.currentTarget;
     let containerId = container.id || container.getAttribute('data-id');
-    if (!containerId) {
-      // fallback: try parent
+
+    // If the hovered element is not a container, walk up to the nearest container
+    const isContainer = (el) => {
+      return el.classList?.contains('canvas-row') ||
+        el.classList?.contains('canvas-col') ||
+        el.classList?.contains('canvas-form') ||
+        el.classList?.contains('canvas-form-item') ||
+        el.classList?.contains('canvas');
+    };
+
+    while (container && !isContainer(container) && container.id !== 'root') {
       container = container.parentElement;
       containerId = container?.id || container?.getAttribute('data-id');
     }
+
     if (!containerId) return { containerId: null, dropIndex: null };
 
     // Find all children (siblings)
-    const siblings = Array.from(container.querySelectorAll(':scope > .component-wrapper, :scope > .canvas-row, :scope > .canvas-col'));
-    // Find the index where the mouse is
+    const selector = ':scope > .component-wrapper, :scope > .canvas-row, :scope > .canvas-col, :scope > .canvas-form, :scope > .canvas-form-item';
+    const siblings = Array.from(container.querySelectorAll(selector));
+
+    // Determine drop index based on pointer position
     let dropIndex = siblings.length;
     for (let i = 0; i < siblings.length; i++) {
       const rect = siblings[i].getBoundingClientRect();
@@ -151,6 +163,7 @@ export const useDragAndDrop = (components, setComponents) => {
         break;
       }
     }
+
     return { containerId, dropIndex };
   };
 
