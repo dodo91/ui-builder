@@ -58,72 +58,34 @@ function App() {
   };
 
   return (
-    <div className="blocks-ui-container">
-      <div className="blocks-main">
-        <div className="canvas-container">
-          <h3 className="section-title">Canvas</h3>
-          <div
-            className={`canvas${invalidDropTarget === 'root' ? ' invalid-drop' : ''}`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleDragOver(e, 'root');
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleDrop(e, []);
-            }}
+    <div className="app-root">
+      {/* Top Blue Bar */}
+      <div className="top-bar">
+        <div className="logo">sparx</div>
+        <div className="top-tabs">
+          <button 
+            className={`top-tab-btn${activeTab === 'components' ? ' active' : ''}`} 
+            onClick={() => setActiveTab('components')}
           >
-            {components.length === 0 && (
-              <div className="empty-canvas">Drag components here. Start with a Row.</div>
-            )}
-            <NodeRenderer 
-              nodes={components} 
-              path={[]} 
-              handlers={handlers} 
-              dragOverMap={dragOverMap} 
-              hoverStack={hoverStack}
-              handleMouseEnter={handleMouseEnter}
-              handleMouseLeave={handleMouseLeave}
-              deepestHoveredId={deepestHoveredId}
-              onComponentClick={handleComponentClick}
-              selectedComponent={selectedComponent}
-              mousePosition={mousePosition}
-              draggedElementPosition={draggedElementPosition}
-              isDragging={isDragging}
-              draggedNode={draggedNode}
-              virtualPositions={virtualPositions}
-              currentContainer={currentContainer}
-              candidateContainerId={candidateContainerId}
-              candidateDropIndex={candidateDropIndex}
-              invalidDropTarget={invalidDropTarget}
-            />
-          </div>
+            Components
+          </button>
+          <button 
+            className={`top-tab-btn${activeTab === 'editor' ? ' active' : ''}`} 
+            onClick={() => setActiveTab('editor')}
+          >
+            Editor
+          </button>
+          <button 
+            className={`top-tab-btn${activeTab === 'code' ? ' active' : ''}`} 
+            onClick={() => setActiveTab('code')}
+          >
+            &lt;/&gt;
+          </button>
         </div>
-
-        <div className="right-panel">
-          <div className="panel-tabs">
-            <button 
-              className={`tab-btn${activeTab === 'components' ? ' active' : ''}`} 
-              onClick={() => setActiveTab('components')}
-            >
-              Components
-            </button>
-            <button 
-              className={`tab-btn${activeTab === 'editor' ? ' active' : ''}`} 
-              onClick={() => setActiveTab('editor')}
-            >
-              Editor
-            </button>
-            <button 
-              className={`tab-btn${activeTab === 'code' ? ' active' : ''}`} 
-              onClick={() => setActiveTab('code')}
-            >
-              &lt;/&gt;
-            </button>
-          </div>
-
+      </div>
+      <div className="main-layout">
+        {/* Left Sidebar */}
+        <div className="left-sidebar">
           {activeTab === 'components' && (
             <div className="components-panel">
               <div 
@@ -136,7 +98,6 @@ function App() {
                 </div>
                 <div className="component-label">Row</div>
               </div>
-
               <div
                 className="component-item"
                 draggable
@@ -147,7 +108,6 @@ function App() {
                 </div>
                 <div className="component-label">Col</div>
               </div>
-
               <div
                 className="component-item"
                 draggable
@@ -158,7 +118,6 @@ function App() {
                 </div>
                 <div className="component-label">Form</div>
               </div>
-
               <div
                 className="component-item"
                 draggable
@@ -169,7 +128,6 @@ function App() {
                 </div>
                 <div className="component-label">Form Item</div>
               </div>
-
               <div 
                 className="component-item" 
                 draggable 
@@ -180,7 +138,6 @@ function App() {
                 </div>
                 <div className="component-label">Button</div>
               </div>
-
               <div 
                 className="component-item" 
                 draggable 
@@ -191,7 +148,6 @@ function App() {
                 </div>
                 <div className="component-label">ComboBox</div>
               </div>
-
               <div 
                 className="component-item" 
                 draggable 
@@ -202,7 +158,6 @@ function App() {
                 </div>
                 <div className="component-label">DatePicker</div>
               </div>
-
               <div 
                 className="component-item" 
                 draggable 
@@ -215,14 +170,12 @@ function App() {
               </div>
             </div>
           )}
-
           {activeTab === 'editor' && (
             <PropertiesEditor 
               selectedComponent={selectedComponent}
               onUpdate={handleComponentUpdate}
             />
           )}
-
           {activeTab === 'code' && (
             <div className="code-panel">
               <pre className="code-output">
@@ -230,6 +183,54 @@ function App() {
               </pre>
             </div>
           )}
+        </div>
+        {/* Main Content Area */}
+        <div className="main-content">
+          {/* Secondary Bar (like 'Pano') */}
+          <div className="secondary-bar">
+            <div className="secondary-tab">Canvas</div>
+          </div>
+          {/* Canvas Area */}
+          <div className="canvas-area">
+            <div
+              className={`canvas${invalidDropTarget === 'root' ? ' invalid-drop' : ''}`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleDragOver(e, 'root');
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleDrop(e, []);
+              }}
+            >
+              {components.length === 0 && (
+                <div className="empty-canvas">Drag components here. Start with a Row.</div>
+              )}
+              <NodeRenderer 
+                nodes={components} 
+                path={[]} 
+                handlers={handlers} 
+                dragOverMap={dragOverMap} 
+                hoverStack={hoverStack}
+                handleMouseEnter={handleMouseEnter}
+                handleMouseLeave={handleMouseLeave}
+                deepestHoveredId={deepestHoveredId}
+                onComponentClick={handleComponentClick}
+                selectedComponent={selectedComponent}
+                mousePosition={mousePosition}
+                draggedElementPosition={draggedElementPosition}
+                isDragging={isDragging}
+                draggedNode={draggedNode}
+                virtualPositions={virtualPositions}
+                currentContainer={currentContainer}
+                candidateContainerId={candidateContainerId}
+                candidateDropIndex={candidateDropIndex}
+                invalidDropTarget={invalidDropTarget}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
