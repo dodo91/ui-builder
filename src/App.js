@@ -193,6 +193,7 @@ function App() {
           {/* Canvas Area */}
           <div className="canvas-area">
             <div
+              id="root"
               className={`canvas${invalidDropTarget === 'root' ? ' invalid-drop' : ''}`}
               onDragOver={(e) => {
                 e.preventDefault();
