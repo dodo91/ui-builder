@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react';
 import { createNode, addNodeAtPath, removeNodeAtPath, getNodeAtPath } from '../utils/treeUtils';
 
+const ESTIMATED_HEIGHTS = {
+  row: 80,
+  col: 60,
+  form: 120,
+  formItem: 72,
+  table: 160,
+  button: 48,
+  combobox: 52,
+  datepicker: 52,
+};
+
+const getEstimatedHeightForType = (type) => {
+  if (!type) return 48;
+  return ESTIMATED_HEIGHTS[type] || 48;
+};
+
 // Determine if dropping a node of type `dragType` inside a container of
 // type `containerType` is allowed. This centralises the rules for
 // parent/child relationships in the builder.
@@ -168,20 +184,21 @@ export const useDragAndDrop = (components, setComponents) => {
       isContainerValid = false;
     }
 
+    const dragType = draggedType || (draggedNode && draggedNode.type);
+
     // Calculate virtual positions for all affected elements only if drop is valid
     if (containerId && isContainerValid) {
+      setCurrentContainer(containerId);
       const container = document.getElementById(containerId) || document.querySelector(`[data-id='${containerId}']`);
       if (container) {
         const positions = {};
-        
+
         // Get the actual height of the dragged element
-        const draggedElementHeight = draggedNode ? 
-          (draggedNode.type === 'row' ? 80 : 
-           draggedNode.type === 'col' ? 60 : 40) : 40;
+        const draggedElementHeight = getEstimatedHeightForType(dragType);
 
         // Get all elements in the container
         const siblings = Array.from(container.querySelectorAll(':scope > .component-wrapper, :scope > .canvas-row, :scope > .canvas-col'));
-        
+
         // Calculate the original positions
         const originalPositions = siblings.map(sibling => {
           const rect = sibling.getBoundingClientRect();
@@ -214,30 +231,45 @@ export const useDragAndDrop = (components, setComponents) => {
           };
         });
 
-        // Add preview for the dragged element
-        if (draggedNode) {
-          const dropTarget = siblings[dropIndex];
-          if (dropTarget) {
-            const rect = dropTarget.getBoundingClientRect();
-            positions['preview'] = {
-              position: 'absolute',
-              top: rect.top,
-              left: rect.left,
-              width: rect.width,
-              height: draggedElementHeight,
-              background: 'rgba(3, 102, 214, 0.1)',
-              border: '2px dashed #0366d6',
-              borderRadius: '4px',
-              pointerEvents: 'none',
-              zIndex: 999,
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-            };
+        // Add preview for the dragged element regardless of source (new or existing)
+        if (dragType) {
+          const dropTarget = typeof dropIndex === 'number' ? siblings[dropIndex] : null;
+          const targetRect = dropTarget ? dropTarget.getBoundingClientRect() : null;
+          const containerRect = container.getBoundingClientRect();
+
+          let previewTop;
+          let previewLeft;
+          let previewWidth;
+
+          if (targetRect) {
+            previewTop = targetRect.top;
+            previewLeft = targetRect.left;
+            previewWidth = targetRect.width;
+          } else {
+            previewTop = containerRect.bottom;
+            previewLeft = containerRect.left;
+            previewWidth = containerRect.width;
           }
+
+          positions['preview'] = {
+            position: 'fixed',
+            top: previewTop,
+            left: previewLeft,
+            width: previewWidth,
+            height: draggedElementHeight,
+            background: 'rgba(3, 102, 214, 0.12)',
+            border: '2px dashed #0366d6',
+            borderRadius: '4px',
+            pointerEvents: 'none',
+            zIndex: 999,
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+          };
         }
 
         setVirtualPositions(positions);
       }
     } else {
+      setCurrentContainer(null);
       setVirtualPositions({});
     }
   };
@@ -249,6 +281,7 @@ export const useDragAndDrop = (components, setComponents) => {
     setCandidateContainerId(null);
     setCandidateDropIndex(null);
     setInvalidDropTarget(null);
+    setCurrentContainer(null);
   };
 
   const handleDrop = (e, path) => {
